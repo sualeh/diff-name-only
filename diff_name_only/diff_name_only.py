@@ -1,11 +1,13 @@
 import hashlib
 import os
+from datetime import datetime
 
 
 def list_files(walk_dir):
     diff_name_only_list_path = os.path.join(walk_dir, 'diff-name-only-list.md')
     with open(diff_name_only_list_path, 'wb') as list_file:
         list_file.write(('# MD5 Checksums For Directory\n').encode('utf-8'))
+        # TODO: Add timestamp for the run
         list_file.write(('%s\n' % os.path.abspath(walk_dir)).encode('utf-8'))
         for root, subdirs, files in os.walk(walk_dir):
             list_file.write(
@@ -13,10 +15,14 @@ def list_files(walk_dir):
             for filename in files:
                 file_path = os.path.join(os.path.abspath(root), filename)
                 file_md5 = md5(file_path)
+                file_mtime = os.path.getmtime(file_path)
                 list_file.write(
                     ('  - `%s`  \n' % filename).encode('utf-8'))
                 list_file.write(
-                    ('    %s\n' % file_md5).encode('utf-8'))
+                    ('    %s  \n' % datetime.fromtimestamp(file_mtime).strftime("%a, %d %b %Y %H:%M:%S")).encode(
+                        'utf-8'))
+                list_file.write(
+                    ('    %s  \n' % file_md5).encode('utf-8'))
 
 
 def md5(fname):
