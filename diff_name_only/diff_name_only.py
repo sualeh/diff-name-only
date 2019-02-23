@@ -1,30 +1,18 @@
 import os
-import time
-from datetime import datetime
 
+from diff_file_name_only_files import DiffFileWriter
 from file_info import FileInfo
 
 
 def list_files(walk_dir):
-    diff_name_only_list_path = os.path.join(walk_dir, 'diff-name-only-list.md')
-    with open(diff_name_only_list_path, 'wb') as list_file:
-        list_file.write(('# MD5 Checksums For Directory\n').encode('utf-8'))
-        list_file.write(
-            ('%s\n\n' % datetime.fromtimestamp(time.time()).strftime("%a, %d %b %Y %H:%M:%S")).encode(
-                'utf-8'))
-        list_file.write(('`%s`\n' % os.path.abspath(walk_dir)).encode('utf-8'))
+    with DiffFileWriter(walk_dir, 'diff-name-only-list.md') as list_file:
+        list_file.write_header()
+        list_file.write_root()
         for root, subdirs, files in os.walk(walk_dir):
-            list_file.write(
-                ('\n- `%s`\n' % os.path.relpath(os.path.abspath(root), os.path.abspath(walk_dir))).encode('utf-8'))
+            list_file.write_newline()
+            list_file.write_directory(root, 0)
             for filename in files:
-                file_info = FileInfo(root, filename)
-                list_file.write(
-                    ('  - `%s`  \n' % filename).encode('utf-8'))
-                list_file.write(
-                    ('    %s  \n' % file_info.mtime()).encode(
-                        'utf-8'))
-                list_file.write(
-                    ('    %s  \n' % file_info.file_md5).encode('utf-8'))
+                list_file.write_file(FileInfo(root, filename), 1)
 
 
 def main():
