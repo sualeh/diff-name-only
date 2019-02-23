@@ -1,7 +1,8 @@
-import hashlib
 import os
 import time
 from datetime import datetime
+
+from file_info import FileInfo
 
 
 def list_files(walk_dir):
@@ -16,24 +17,14 @@ def list_files(walk_dir):
             list_file.write(
                 ('\n- `%s`\n' % os.path.relpath(os.path.abspath(root), os.path.abspath(walk_dir))).encode('utf-8'))
             for filename in files:
-                file_path = os.path.join(os.path.abspath(root), filename)
-                file_md5 = md5(file_path)
-                file_mtime = os.path.getmtime(file_path)
+                file_info = FileInfo(root, filename)
                 list_file.write(
                     ('  - `%s`  \n' % filename).encode('utf-8'))
                 list_file.write(
-                    ('    %s  \n' % datetime.fromtimestamp(file_mtime).strftime("%a, %d %b %Y %H:%M:%S")).encode(
+                    ('    %s  \n' % file_info.mtime()).encode(
                         'utf-8'))
                 list_file.write(
-                    ('    %s  \n' % file_md5).encode('utf-8'))
-
-
-def md5(fname):
-    hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+                    ('    %s  \n' % file_info.file_md5).encode('utf-8'))
 
 
 def main():
